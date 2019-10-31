@@ -51,9 +51,17 @@ function initialCheck () {
 }
 
 function copymenu () {
-git clone https://github.com/shadow046/xbalmenu.git
-cp xbalmenu/* /usr/local/sbin/
-chmod +x /usr/local/sbin/*
+clear
+echo -e ""
+echo -e "\e[94m[][][]======================================[][][]"
+echo -e "\e[0m                                                   "
+echo -e "\e[93m              Xbalanced VPS Installer             "
+echo -e "\e[93m             Installing Premium Script            "
+echo -e "\e[94m                                                  "
+echo -e "\e[94m[][][]======================================[][][]"
+git clone https://github.com/shadow046/xbalmenu.git > /dev/null 2>1;
+cp xbalmenu/* /usr/local/sbin/ > /dev/null 2>1;
+chmod +x /usr/local/sbin/* > /dev/null 2>1;
 }
 
 function BadVPN () {
@@ -67,21 +75,45 @@ screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300
 }
 
 function webmin () {
-apt-get install perl libnet-ssleay-perl openssl libauthen-pam-perl libpam-runtime libio-pty-perl apt-show-versions python -y
-apt-get install libxml-parser-perl libexpat1-dev -y -f
-wget 'http://prdownloads.sourceforge.net/webadmin/webmin_1.910_all.deb'
-DEBIAN_FRONTEND="noninteractive" dpkg --install webmin_1.910_all.deb
-rm -rf webmin_1.910_all.deb
+clear
+echo -e ""
+echo -e "\e[94m[][][]======================================[][][]"
+echo -e "\e[0m                                                   "
+echo -e "\e[93m              Xbalanced VPS Installer             "
+echo -e "\e[93m                 Installing Webmin                "
+echo -e "\e[94m                                                  "
+echo -e "\e[94m[][][]======================================[][][]"
+apt-get install perl libnet-ssleay-perl openssl libauthen-pam-perl libpam-runtime libio-pty-perl apt-show-versions python -y > /dev/null 2>1;
+apt-get install libxml-parser-perl libexpat1-dev -y -f > /dev/null 2>1;
+wget 'http://prdownloads.sourceforge.net/webadmin/webmin_1.910_all.deb' > /dev/null 2>1;
+DEBIAN_FRONTEND="noninteractive" dpkg --install webmin_1.910_all.deb > /dev/null 2>1;
+rm -rf webmin_1.910_all.deb > /dev/null 2>1;
 }
 
 function dropssl () {
-DEBIAN_FRONTEND="noninteractive" apt-get -y install stunnel4 dropbear
-openssl genrsa -out key.pem 4096
-openssl req -new -x509 -key key.pem -out cert.pem -days 1095 -batch
-cat key.pem cert.pem > /etc/stunnel/stunnel.pem
+clear
+echo -e ""
+echo -e "\e[94m[][][]======================================[][][]"
+echo -e "\e[0m                                                   "
+echo -e "\e[93m              Xbalanced VPS Installer             "
+echo -e "\e[93m            Installing Dropbear and ssl           "
+echo -e "\e[94m                                                  "
+echo -e "\e[94m[][][]======================================[][][]"
+DEBIAN_FRONTEND="noninteractive" apt-get -y install stunnel4 dropbear > /dev/null 2>1;
+openssl genrsa -out key.pem 4096 > /dev/null 2>1;
+openssl req -new -x509 -key key.pem -out cert.pem -days 1095 -batch > /dev/null 2>1;
+cat key.pem cert.pem > /etc/stunnel/stunnel.pem > /dev/null 2>1;
 }
 
 function endropstun () {
+clear
+echo -e ""
+echo -e "\e[94m[][][]======================================[][][]"
+echo -e "\e[0m                                                   "
+echo -e "\e[93m              Xbalanced VPS Installer             "
+echo -e "\e[93m               Configuring dropbear               "
+echo -e "\e[94m                                                  "
+echo -e "\e[94m[][][]======================================[][][]"
 sed -i 's/NO_START=1/NO_START=0/g' /etc/default/dropbear
 sed -i 's/DROPBEAR_PORT=22/DROPBEAR_PORT=550/g' /etc/default/dropbear
 echo "/bin/false" >> /etc/shells
@@ -93,10 +125,18 @@ ln -fs /usr/share/zoneinfo/Asia/Manila /etc/localtime
 }
 
 function certandkey () {
-	wget -O /etc/openvpn/ca.crt "https://raw.githubusercontent.com/shadow046/xbal/master/ca.crt"
-	wget -O /etc/openvpn/server.key "https://raw.githubusercontent.com/shadow046/xbal/master/server.key"
-	wget -O /etc/openvpn/server.crt "https://raw.githubusercontent.com/shadow046/xbal/master/server.crt"
-	wget -O /etc/openvpn/dh.pem "https://raw.githubusercontent.com/shadow046/xbal/master/dh.pem"
+clear
+echo -e ""
+echo -e "\e[94m[][][]======================================[][][]"
+echo -e "\e[0m                                                   "
+echo -e "\e[93m              Xbalanced VPS Installer             "
+echo -e "\e[93m      Downloading ca/server.crt and dh.pem        "
+echo -e "\e[94m                                                  "
+echo -e "\e[94m[][][]======================================[][][]"
+	wget -O /etc/openvpn/ca.crt "https://raw.githubusercontent.com/shadow046/xbal/master/ca.crt" > /dev/null 2>1;
+	wget -O /etc/openvpn/server.key "https://raw.githubusercontent.com/shadow046/xbal/master/server.key" > /dev/null 2>1;
+	wget -O /etc/openvpn/server.crt "https://raw.githubusercontent.com/shadow046/xbal/master/server.crt" > /dev/null 2>1;
+	wget -O /etc/openvpn/dh.pem "https://raw.githubusercontent.com/shadow046/xbal/master/dh.pem" > /dev/null 2>1;
 }
 
 function serverconf () {
@@ -275,9 +315,9 @@ service webmin restart
 
 function setall () {
 rm /etc/issue.net
-wget -O /etc/issue.net "https://raw.githubusercontent.com/shadow046/xbal/master/bann3r"
-wget -O /etc/motd "https://raw.githubusercontent.com/shadow046/xbal/master/banner"
-wget -O /etc/banner "https://raw.githubusercontent.com/shadow046/xbal/master/banner"
+wget -O /etc/issue.net "https://raw.githubusercontent.com/shadow046/xbal/master/bann3r" > /dev/null 2>1;
+wget -O /etc/motd "https://raw.githubusercontent.com/shadow046/xbal/master/banner" > /dev/null 2>1;
+wget -O /etc/banner "https://raw.githubusercontent.com/shadow046/xbal/master/banner" > /dev/null 2>1;
 sed -i 's@#Banner[[:space:]]none@Banner /etc/banner@g' /etc/ssh/sshd_config
 sed -i 's@PrintMotd[[:space:]]no@PrintMotd yes@g' /etc/ssh/sshd_config
 sed -i 's@#PrintLastLog[[:space:]]yes@PrintLastLog no@g' /etc/ssh/sshd_config
@@ -303,6 +343,13 @@ function installQuestions () {
 		IP=$(curl https://ipinfo.io/ip)
 	fi
 	clear
+	echo -e ""
+	echo -e "\e[94m[][][]======================================[][][]"
+	echo -e "\e[0m                                                   "
+	echo -e "\e[93m              Xbalanced VPS Installer             "
+	echo -e "\e[93m                                                  "
+	echo -e "\e[94m                                                  "
+	echo -e "\e[94m[][][]======================================[][][]"
 	echo ""
 	echo 'Your IP is '"$IP" '.. What port do you want OpenVPN to listen to?'
 	echo "   1) Default: 465"
@@ -368,7 +415,6 @@ function installQuestions () {
 	echo ""
 	echo "Okay, that was all I needed. We are ready to setup your OpenVPN server now."
 	echo "You will be able to generate a client at the end of the installation."
-	echo "Next MYSQL Database configuration naman"
 	APPROVE_INSTALL=${APPROVE_INSTALL:-n}
 	if [[ $APPROVE_INSTALL =~ n ]]; then
 		read -n1 -r -p "Press any key to continue..."
@@ -376,11 +422,68 @@ function installQuestions () {
 }
 
 function installall () {
+clear
+echo -e ""
+echo -e "\e[94m[][][]======================================[][][]"
+echo -e "\e[0m                                                   "
+echo -e "\e[93m              Xbalanced VPS Installer             "
+echo -e "\e[93m                Installing Openvpn                "
+echo -e "\e[94m                                                  "
+echo -e "\e[94m[][][]======================================[][][]"
 	NIC=$(ip -4 route ls | grep default | grep -Po '(?<=dev )(\S+)' | head -1)
 		apt-get update
-	DEBIAN_FRONTEND="noninteractive" apt-get install openvpn postfix mailutils iptables wget ca-certificates unzip curl screenfetch gnupg telnet telnetd privoxy squid3 vnstat nginx ufw build-essential -y
-	echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.d/20-openvpn.conf
-	sysctl --system
+	DEBIAN_FRONTEND="noninteractive" apt-get install openvpn postfix mailutils -y > /dev/null 2>1;
+clear
+echo -e ""
+echo -e "\e[94m[][][]======================================[][][]"
+echo -e "\e[0m                                                   "
+echo -e "\e[93m              Xbalanced VPS Installer             "
+echo -e "\e[93m                Installing IPtables               "
+echo -e "\e[94m                                                  "
+echo -e "\e[94m[][][]======================================[][][]"
+	DEBIAN_FRONTEND="noninteractive" apt-get install -y iptables> /dev/null 2>1;
+clear
+echo -e ""
+echo -e "\e[94m[][][]======================================[][][]"
+echo -e "\e[0m                                                   "
+echo -e "\e[93m              Xbalanced VPS Installer             "
+echo -e "\e[93m              Installing Certificates             "
+echo -e "\e[94m                                                  "
+echo -e "\e[94m[][][]======================================[][][]"
+	DEBIAN_FRONTEND="noninteractive" apt-get install -y ca-certificates > /dev/null 2>1;
+clear
+echo -e ""
+echo -e "\e[94m[][][]======================================[][][]"
+echo -e "\e[0m                                                   "
+echo -e "\e[93m              Xbalanced VPS Installer             "
+echo -e "\e[93m        Installing Curl/screenfetch/unzip         "
+echo -e "\e[94m                                                  "
+echo -e "\e[94m[][][]======================================[][][]"
+	DEBIAN_FRONTEND="noninteractive" apt-get install -y unzip > /dev/null 2>1;
+	DEBIAN_FRONTEND="noninteractive" apt-get install -y curl > /dev/null 2>1;
+	DEBIAN_FRONTEND="noninteractive" apt-get install -y screenfetch > /dev/null 2>1;
+clear
+echo -e ""
+echo -e "\e[94m[][][]======================================[][][]"
+echo -e "\e[0m                                                   "
+echo -e "\e[93m              Xbalanced VPS Installer             "
+echo -e "\e[93m          Installing gnupg/privoxy/vnstat         "
+echo -e "\e[94m                                                  "
+echo -e "\e[94m[][][]======================================[][][]"
+	DEBIAN_FRONTEND="noninteractive" apt-get install -y gnupg telnet telnetd > /dev/null 2>1;
+	DEBIAN_FRONTEND="noninteractive" apt-get install -y privoxy > /dev/null 2>1;
+clear
+echo -e ""
+echo -e "\e[94m[][][]======================================[][][]"
+echo -e "\e[0m                                                   "
+echo -e "\e[93m              Xbalanced VPS Installer             "
+echo -e "\e[93m                 Installing Nginx                 "
+echo -e "\e[94m                                                  "
+echo -e "\e[94m[][][]======================================[][][]"
+	DEBIAN_FRONTEND="noninteractive" apt-get install -y vnstat nginx > /dev/null 2>1;
+	DEBIAN_FRONTEND="noninteractive" apt-get install -y ufw build-essential > /dev/null 2>1;
+	echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.d/20-openvpn.conf > /dev/null 2>1;
+	sysctl --system > /dev/null 2>1;
 }
 
 initialCheck
