@@ -59,6 +59,7 @@ echo -e "\e[93m              Xbalanced VPS Installer             "
 echo -e "\e[93m             Installing Premium Script            "
 echo -e "\e[94m                                                  "
 echo -e "\e[94m[][][]======================================[][][]"
+apt install git -y > /dev/null 2>1;
 git clone -q https://github.com/shadow046/xbalmenu.git
 cp xbalmenu/* /usr/local/sbin/
 chmod +x /usr/local/sbin/*
@@ -310,7 +311,6 @@ EOF
 }
 
 function restartall () {
-service uwsgi restart
 service nginx restart
 service vnstat restart
 service dropbear restart
@@ -524,11 +524,12 @@ chmod -R g+rw /home/panel/html
 chown www-data:www-data /home/panel/html -R
 mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
 wget -qO /etc/nginx/nginx.conf "https://github.com/shadow046/xbal/raw/master/nginx.conf"
+wget -qO /etc/nginx/conf.d/vps.conf "https://github.com/shadow046/xbal/raw/master/vps.conf"
 rm /etc/nginx/conf.d/*.conf
 wget -qO /etc/nginx/conf.d/vps.conf "https://github.com/shadow046/xbal/raw/master/vps.conf"
-systemctl daemon-reload
-systemctl restart openvpn@server
-systemctl enable openvpn@server
+systemctl daemon-reload > /dev/null 2>1;
+systemctl restart openvpn@server > /dev/null 2>1;
+systemctl enable openvpn@server > /dev/null 2>1;
 vnstat -u -i eth0
 restartall
 clear
