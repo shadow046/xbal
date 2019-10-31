@@ -101,9 +101,9 @@ echo -e "\e[93m            Installing Dropbear and ssl           "
 echo -e "\e[94m                                                  "
 echo -e "\e[94m[][][]======================================[][][]"
 DEBIAN_FRONTEND="noninteractive" apt-get -y install stunnel4 dropbear > /dev/null 2>1;
-openssl genrsa -out key.pem 4096 > /dev/null 2>1;
-openssl req -new -x509 -key key.pem -out cert.pem -days 1095 -batch > /dev/null 2>1;
-cat key.pem cert.pem > /etc/stunnel/stunnel.pem > /dev/null 2>1;
+openssl genrsa -out key.pem 4096
+openssl req -new -x509 -key key.pem -out cert.pem -days 1095 -batch
+cat key.pem cert.pem > /etc/stunnel/stunnel.pem
 }
 
 function endropstun () {
