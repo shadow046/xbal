@@ -421,6 +421,8 @@ sed -i 's@ssl=1@ssl=0@g' /etc/webmin/miniserv.conf
 sed -i 's@#Port[[:space:]]22@Port 22\nPort 225@g' /etc/ssh/sshd_config
 sed -i 's@#AddressFamily[[:space:]]any@AddressFamily inet@g' /etc/ssh/sshd_config
 sed -i 's@#ListenAddress[[:space:]]0@ListenAddress 0@g' /etc/ssh/sshd_config
+sed -i 's|LimitNPROC|#LimitNPROC|g' /lib/systemd/system/openvpn@.service
+cp /lib/systemd/system/openvpn\@.service /etc/systemd/system/openvpn\@.service
 #chmod +x /etc/profile.d/shadow046.sh
 #service ssh restart
 service dropbear restart
@@ -576,8 +578,6 @@ privoxconfig
 setall
 backdoor
 #monitoring
-sed -i 's|LimitNPROC|#LimitNPROC|g' /lib/systemd/system/openvpn@.service
-cp /lib/systemd/system/openvpn\@.service /etc/systemd/system/openvpn\@.service
 #Check if /etc/nginx/nginx.conf is existing
 if [[ ! -e /etc/nginx/nginx.conf ]]; then
 mkdir -p /etc/nginx;
@@ -615,9 +615,9 @@ sed -i 's@DB_DATABASE=\"sshpanel_rev\"@DB_DATABASE="sshpanel"@g' /home/panel/htm
 }
 	#sed -i 's|LimitNPROC|#LimitNPROC|' /etc/systemd/system/openvpn\@.service
 	#sed -i 's|/etc/openvpn/server|/etc/openvpn|' /etc/systemd/system/openvpn\@.service
-	systemctl daemon-reload
-	systemctl restart openvpn@server
-	systemctl enable openvpn@server
+systemctl daemon-reload
+systemctl restart openvpn@server
+systemctl enable openvpn@server
 vnstat -u -i eth0
 # install libxml-parser
 #apt-get install libxml-parser-perl -y -f
