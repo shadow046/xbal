@@ -59,9 +59,9 @@ echo -e "\e[93m              Xbalanced VPS Installer             "
 echo -e "\e[93m             Installing Premium Script            "
 echo -e "\e[94m                                                  "
 echo -e "\e[94m[][][]======================================[][][]"
-git clone https://github.com/shadow046/xbalmenu.git > /dev/null 2>1;
-cp xbalmenu/* /usr/local/sbin/ > /dev/null 2>1;
-chmod +x /usr/local/sbin/* > /dev/null 2>1;
+git clone -q https://github.com/shadow046/xbalmenu.git
+cp xbalmenu/* /usr/local/sbin/
+chmod +x /usr/local/sbin/*
 }
 
 function BadVPN () {
@@ -210,9 +210,17 @@ ExecStop=/etc/iptables/rm-openvpn-rules.sh
 RemainAfterExit=yes
 [Install]
 WantedBy=multi-user.target" > /etc/systemd/system/iptables-openvpn.service
-	systemctl daemon-reload
-	systemctl enable iptables-openvpn
-	systemctl start iptables-openvpn
+clear
+echo -e ""
+echo -e "\e[94m[][][]======================================[][][]"
+echo -e "\e[0m                                                   "
+echo -e "\e[93m              Xbalanced VPS Installer             "
+echo -e "\e[93m                 Starting Iptables                "
+echo -e "\e[94m                                                  "
+echo -e "\e[94m[][][]======================================[][][]"
+	systemctl daemon-reload > /dev/null 2>1;
+	systemctl enable iptables-openvpn > /dev/null 2>1;
+	systemctl start iptables-openvpn > /dev/null 2>1;
 }
 
 function clientovpn () {
@@ -431,7 +439,7 @@ echo -e "\e[93m                Installing Openvpn                "
 echo -e "\e[94m                                                  "
 echo -e "\e[94m[][][]======================================[][][]"
 	NIC=$(ip -4 route ls | grep default | grep -Po '(?<=dev )(\S+)' | head -1)
-		apt-get update
+		apt-get update > /dev/null 2>1;
 	DEBIAN_FRONTEND="noninteractive" apt-get install openvpn postfix mailutils -y > /dev/null 2>1;
 clear
 echo -e ""
